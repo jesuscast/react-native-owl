@@ -11,8 +11,10 @@ declare global {
       /** Compares the image passed to the baseline one */
       toMatchBaseline: ({
         threshold,
+        diffPixelsThreshold,
       }?: {
         threshold?: number;
+        diffPixelsThreshold?: number;
       }) => CustomMatcherResult;
     }
   }
@@ -20,7 +22,7 @@ declare global {
 
 export const toMatchBaseline = (
   latestPath: string,
-  options: { threshold?: number } = { threshold: 0.1 }
+  options: { threshold?: number, diffPixelsThreshold?: number } = { threshold: 0.1, diffPixelsThreshold: 0 }
 ) => {
   const platform = process.env.OWL_PLATFORM as Platform;
   const screenshotsDir = path.join(path.dirname(latestPath), '..', '..');
@@ -67,7 +69,7 @@ export const toMatchBaseline = (
       { threshold: options?.threshold }
     );
 
-    if (diffPixelsCount === 0) {
+    if ((options?.diffPixelsThreshold && diffPixelsCount <= options?.diffPixelsThreshold) || diffPixelsCount === 0) {
       return {
         message: () =>
           `Compared screenshot to match baseline. No differences were found.`,
